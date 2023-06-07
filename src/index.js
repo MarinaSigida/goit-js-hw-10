@@ -35,9 +35,6 @@ function renderBreedSelector(breedList) {
   });
 }
 
-function fetchCatByBreed(breedId) {
-  return fetch(catInfoUrl + breedId, options);
-}
 
 function renderCatInfo(cats) {
   let catInfo = cats.map(({ breeds, url }) => {
