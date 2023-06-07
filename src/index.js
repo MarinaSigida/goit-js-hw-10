@@ -1,4 +1,6 @@
-// import {fetchBreeds} from './cat-api';
+import { fetchBreeds, fetchCatByBreed } from './cat-api';
+import SlimSelect from 'slim-select';
+import Notiflix from 'notiflix';
 
 const refs = {
   breedSelect: document.querySelector('select.breed-select'),
@@ -7,47 +9,30 @@ const refs = {
   catInfo: document.querySelector('div.cat-info'),
 };
 
-const url = 'https://api.thecatapi.com/v1/breeds';
-const catInfoUrl = 'https://api.thecatapi.com/v1/images/search?breed_ids=';
-const options = {
-  headers: {
-    'x-api-key':
-      'live_rXvzCi1moeTLygU8rBTnVD6ehRR0Epach7KXn7cu0H6esWQ265Sjy8F8yms7E9n8',
-  },
-};
+refs.breedSelect.classList.add('hidden');
+refs.error.classList.add('hidden');
 
-hide(refs.breedSelect);
-hide(refs.error);
-show(refs.loader);
-
-fetch(url, options)
+fetchBreeds()
   .then(response => {
     response.json().then(renderBreedSelector);
-    hide(refs.loader);
+    refs.loader.classList.add('hidden');
   })
   .catch(() => {
-    show(refs.error);
-    hide(refs.loader);
+    Notiflix.Notify.failure(refs.error.innerHTML);
+    refs.loader.classList.add('hidden');
   });
 
 function renderBreedSelector(breedList) {
   let breedOptions = breedList.map(({ id, name }) => {
     return `
-      <select class="breed-select">
-      <option value="${id}">${name}</option>
-      </select>
-      `;
+            <option value="${id}">${name}</option>
+            `;
   });
   refs.breedSelect.innerHTML = breedOptions.join('');
-  show(refs.breedSelect);
-}
-
-function hide(el) {
-  el.style.display = 'none';
-}
-
-function show(el) {
-  el.style.display = 'block';
+  refs.breedSelect.classList.remove('hidden');
+  new SlimSelect({
+    select: '.breed-select',
+  });
 }
 
 function fetchCatByBreed(breedId) {
@@ -59,30 +44,33 @@ function renderCatInfo(cats) {
     return `
         <div class="cat-info">
         <img src="${url}" alt="${breeds[0].name}" width="600"/>
-        <h1>${breeds[0].name}</h1>
+        <div class="cat-info-text">
+        <h1 class="cat-title">${breeds[0].name}</h1>
         <p>${breeds[0].description}</p>
-        <p><span>Temperament:</span>
+        <p><span class="temperament">Temperament:</span>
         ${breeds[0].temperament}</p>
+        </div>
         </div>
           `;
   });
   refs.catInfo.innerHTML = catInfo.join('');
-  show(refs.catInfo);
+  refs.catInfo.classList.remove('hidden');
 }
 
 refs.breedSelect.addEventListener('change', event => {
-  hide(refs.error);
-  hide(refs.catInfo);
-  show(refs.loader);
+  refs.error.classList.add('hidden');
+  refs.catInfo.classList.add('hidden');
+  refs.loader.classList.remove('hidden');
   fetchCatByBreed(event.target.value).then(response => {
     response
       .json()
       .then(renderCatInfo)
       .catch(() => {
-        show(refs.error);
-        hide(refs.loader);
-        hide(refs.catInfo);
+        Notiflix.Notify.failure(refs.error.innerHTML);
+        refs.loader.classList.add('hidden');
+        refs.catInfo.classList.add('hidden');
       });
-    hide(refs.loader);
+    refs.loader.classList.add('hidden');
   });
 });
+
