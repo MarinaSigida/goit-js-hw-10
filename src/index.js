@@ -14,7 +14,7 @@ refs.error.classList.add('hidden');
 
 fetchBreeds()
   .then(response => {
-    response.json().then(renderBreedSelector);
+    renderBreedSelector(response);
     refs.loader.classList.add('hidden');
   })
   .catch(() => {
@@ -34,7 +34,6 @@ function renderBreedSelector(breedList) {
     select: '.breed-select',
   });
 }
-
 
 function renderCatInfo(cats) {
   let catInfo = cats.map(({ breeds, url }) => {
@@ -58,16 +57,14 @@ refs.breedSelect.addEventListener('change', event => {
   refs.error.classList.add('hidden');
   refs.catInfo.classList.add('hidden');
   refs.loader.classList.remove('hidden');
-  fetchCatByBreed(event.target.value).then(response => {
-    response
-      .json()
-      .then(renderCatInfo)
-      .catch(() => {
-        Notiflix.Notify.failure(refs.error.innerHTML);
-        refs.loader.classList.add('hidden');
-        refs.catInfo.classList.add('hidden');
-      });
-    refs.loader.classList.add('hidden');
-  });
+  fetchCatByBreed(event.target.value)
+    .then(response => {
+      renderCatInfo(response);
+    })
+    .catch(() => {
+      Notiflix.Notify.failure(refs.error.innerHTML);
+      refs.loader.classList.add('hidden');
+      refs.catInfo.classList.add('hidden');
+    });
+  refs.loader.classList.add('hidden');
 });
-
